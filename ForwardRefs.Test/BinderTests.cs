@@ -15,6 +15,7 @@ namespace ForwardRefs.Test
             {
                 new ProcedureSyntax("Main", new StatementSyntax[]
                 {
+                    new CallStatementSyntax("Proc1"),
                     new CallStatementSyntax("Proc1")
                 }),
                 new ProcedureSyntax("Proc1", new StatementSyntax[]

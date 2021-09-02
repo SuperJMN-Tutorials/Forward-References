@@ -6,7 +6,7 @@ namespace ForwardRefs.Test.Semantic
     {
         public IEnumerable<BoundProcedure> Procedures { get; }
 
-        public BoundRoot(IEnumerable<BoundProcedure> procedures)
+        public BoundRoot(ICollection<BoundProcedure> procedures)
         {
             Procedures = procedures;
         }

@@ -4,9 +4,9 @@ namespace ForwardRefs.Test.Semantic
 {
     public class BoundProcedure
     {
-        public IEnumerable<BoundStatement> Statements { get; }
+        public ICollection<BoundStatement> Statements { get; }
 
-        public BoundProcedure(IEnumerable<BoundStatement> statements)
+        public BoundProcedure(ICollection<BoundStatement> statements)
         {
             Statements = statements;
         }
