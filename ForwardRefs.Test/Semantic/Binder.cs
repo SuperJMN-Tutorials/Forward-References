@@ -46,18 +46,20 @@ namespace ForwardRefs.Test.Semantic
 
         private IEnumerable<BoundProcedure> Resolve(Dictionary<string, BoundProcedure> boundProcedures)
         {
-            return boundProcedures.Select(entry => Resolve(entry.Value, boundProcedures, entry.Key));
+            return boundProcedures.Select(entry => Resolve(entry.Key, entry.Value, boundProcedures));
         }
 
-        private BoundProcedure Resolve(BoundProcedure procedure, Dictionary<string, BoundProcedure> boundProcedures, string name)
+        private BoundProcedure Resolve(string name, BoundProcedure procedure, Dictionary<string, BoundProcedure> boundProcedures)
         {
-            if (cache.TryGetValue(name, out var b))
+            if (cache.TryGetValue(name, out var cached))
             {
-                return b;
+                return cached;
             }
 
             var statements = procedure.Statements.Select(st => Resolve(st, boundProcedures));
-            return new BoundProcedure(statements.ToList());
+            var boundProcedure = new BoundProcedure(statements.ToList());
+            cache.Add(name, boundProcedure);
+            return boundProcedure;
         }
 
         private BoundStatement Resolve(BoundStatement statement, Dictionary<string, BoundProcedure> boundProcedures)
@@ -65,24 +67,12 @@ namespace ForwardRefs.Test.Semantic
             switch (statement)
             {
                 case UnresolvedCallStatement unresolvedCall:
-                    var boundProcedure = FromName(unresolvedCall.ProcedureName, boundProcedures);
-                    return new BoundCallStatement(boundProcedure);
+                    var proc = boundProcedures[unresolvedCall.ProcedureName];
+                    return new BoundCallStatement(Resolve(unresolvedCall.ProcedureName, proc, boundProcedures));
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(statement));
             }
-        }
-
-        private BoundProcedure FromName(string procName, Dictionary<string, BoundProcedure> boundProcedures)
-        {
-            if (cache.TryGetValue(procName, out var r))
-            {
-                return r;
-            }
-
-            var proc = boundProcedures[procName];
-            var boundProcedure = Resolve(proc, boundProcedures, procName);
-            cache.Add(procName, boundProcedure);
-            return boundProcedure;
         }
     }
 }
