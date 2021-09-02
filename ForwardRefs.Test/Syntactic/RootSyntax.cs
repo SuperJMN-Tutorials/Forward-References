@@ -1,4 +1,4 @@
-namespace ForwardRefs.Test
+namespace ForwardRefs.Test.Syntactic
 {
     public class RootSyntax
     {

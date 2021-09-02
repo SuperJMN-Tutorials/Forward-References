@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace ForwardRefs.Test
+namespace ForwardRefs.Test.Semantic
 {
     public class BoundProcedure
     {

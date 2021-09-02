@@ -1,6 +1,6 @@
-namespace ForwardRefs.Test
+namespace ForwardRefs.Test.Syntactic
 {
-    public class CallStatementSyntax : SyntaxStatement
+    public class CallStatementSyntax : StatementSyntax
     {
         public string ProcedureName { get; }
 

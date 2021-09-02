@@ -1,3 +1,5 @@
+using ForwardRefs.Test.Semantic;
+using ForwardRefs.Test.Syntactic;
 using Xunit;
 
 namespace ForwardRefs.Test
@@ -9,13 +11,13 @@ namespace ForwardRefs.Test
         {
             var sut = new Binder();
 
-            var boundAst = sut.Bind(new RootSyntax(new[]
+            var actualAst = sut.Bind(new RootSyntax(new[]
             {
-                new ProcedureSyntax("Main", new SyntaxStatement[]
+                new ProcedureSyntax("Main", new StatementSyntax[]
                 {
                     new CallStatementSyntax("Proc1")
                 }),
-                new ProcedureSyntax("Proc1", new SyntaxStatement[]
+                new ProcedureSyntax("Proc1", new StatementSyntax[]
                 {
                 })
             }));

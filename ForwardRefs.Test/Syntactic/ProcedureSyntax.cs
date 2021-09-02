@@ -1,11 +1,11 @@
-namespace ForwardRefs.Test
+namespace ForwardRefs.Test.Syntactic
 {
     public class ProcedureSyntax
     {
         public string Name { get; }
-        public SyntaxStatement[] Statements { get; }
+        public StatementSyntax[] Statements { get; }
 
-        public ProcedureSyntax(string name, SyntaxStatement[] statements)
+        public ProcedureSyntax(string name, StatementSyntax[] statements)
         {
             Name = name;
             Statements = statements;
