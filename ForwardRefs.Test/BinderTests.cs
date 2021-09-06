@@ -26,5 +26,23 @@ namespace ForwardRefs.Test
                 .Should()
                 .Be("#1{Call(#2);Call(#2);}#2{}");
         }
+
+        [Fact]
+        public void Test_circular_reference()
+        {
+            var sut = new Binder();
+
+            var actualAst = sut.Bind(new RootSyntax(new[]
+            {
+                new ProcedureSyntax("Main", new StatementSyntax[]
+                {
+                    new CallStatementSyntax("Main"),
+                }),
+            }));
+
+            actualAst.AsString()
+                .Should()
+                .Be("#1{Call(#1)}");
+        }
     }
 }
