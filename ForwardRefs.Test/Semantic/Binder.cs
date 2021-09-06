@@ -12,7 +12,7 @@ namespace ForwardRefs.Test.Semantic
         public BoundRoot Bind(RootSyntax rootSyntax)
         {
             var table = CreateProceduresTable(rootSyntax);
-            var resolved = Resolve(table);
+            var resolved = ResolveProcedures(table);
             return new BoundRoot(resolved.ToList());
         }
 
@@ -44,31 +44,31 @@ namespace ForwardRefs.Test.Semantic
             return new BoundProcedure(statements.ToList());
         }
 
-        private IEnumerable<BoundProcedure> Resolve(Dictionary<string, BoundProcedure> boundProcedures)
+        private IEnumerable<BoundProcedure> ResolveProcedures(Dictionary<string, BoundProcedure> boundProcedures)
         {
-            return boundProcedures.Select(entry => Resolve(entry.Key, entry.Value, boundProcedures));
+            return boundProcedures.Select(entry => ResolveProcedure(entry.Key, entry.Value, boundProcedures));
         }
 
-        private BoundProcedure Resolve(string name, BoundProcedure procedure, Dictionary<string, BoundProcedure> boundProcedures)
+        private BoundProcedure ResolveProcedure(string name, BoundProcedure procedure, Dictionary<string, BoundProcedure> boundProcedures)
         {
             if (cache.TryGetValue(name, out var cached))
             {
                 return cached;
             }
 
-            var statements = procedure.Statements.Select(st => Resolve(st, boundProcedures));
+            var statements = procedure.Statements.Select(st => ResolveStatement(st, boundProcedures));
             var boundProcedure = new BoundProcedure(statements.ToList());
             cache.Add(name, boundProcedure);
             return boundProcedure;
         }
 
-        private BoundStatement Resolve(BoundStatement statement, Dictionary<string, BoundProcedure> boundProcedures)
+        private BoundStatement ResolveStatement(BoundStatement statement, Dictionary<string, BoundProcedure> boundProcedures)
         {
             switch (statement)
             {
                 case UnresolvedCallStatement unresolvedCall:
                     var proc = boundProcedures[unresolvedCall.ProcedureName];
-                    return new BoundCallStatement(Resolve(unresolvedCall.ProcedureName, proc, boundProcedures));
+                    return new BoundCallStatement(ResolveProcedure(unresolvedCall.ProcedureName, proc, boundProcedures));
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(statement));
