@@ -12,7 +12,7 @@ namespace ForwardRefs.Test.Semantic
         public BoundRoot Bind(RootSyntax rootSyntax)
         {
             var table = CreateProceduresTable(rootSyntax);
-            var resolved = ResolveProcedures(table);
+            var resolved = ResolveProcedures(table, new HashSet<string>());
             return new BoundRoot(resolved.ToList());
         }
 
@@ -44,31 +44,41 @@ namespace ForwardRefs.Test.Semantic
             return new BoundProcedure(statements.ToList());
         }
 
-        private IEnumerable<BoundProcedure> ResolveProcedures(Dictionary<string, BoundProcedure> boundProcedures)
+        private IEnumerable<BoundProcedure> ResolveProcedures(Dictionary<string, BoundProcedure> boundProcedures, ISet<string> resolving)
         {
-            return boundProcedures.Select(entry => ResolveProcedure(entry.Key, entry.Value, boundProcedures));
+            return boundProcedures.Select(entry => ResolveProcedure(entry.Key, entry.Value, boundProcedures, resolving));
         }
 
-        private BoundProcedure ResolveProcedure(string name, BoundProcedure procedure, Dictionary<string, BoundProcedure> boundProcedures)
+        private BoundProcedure ResolveProcedure(string name, BoundProcedure procedure, Dictionary<string, BoundProcedure> boundProcedures,
+            ISet<string> resolving)
         {
+            if (resolving.Contains(name))
+            {
+                throw new InvalidOperationException("Circular reference detected");
+            }
+
+            resolving.Add(name);
             if (cache.TryGetValue(name, out var cached))
             {
                 return cached;
             }
 
-            var statements = procedure.Statements.Select(st => ResolveStatement(st, boundProcedures));
+            var statements = procedure.Statements.Select(st => ResolveStatement(st, boundProcedures, resolving));
             var boundProcedure = new BoundProcedure(statements.ToList());
             cache.Add(name, boundProcedure);
             return boundProcedure;
         }
 
-        private BoundStatement ResolveStatement(BoundStatement statement, Dictionary<string, BoundProcedure> boundProcedures)
+        private BoundStatement ResolveStatement(BoundStatement statement, Dictionary<string, BoundProcedure> boundProcedures, ISet<string> resolving)
         {
             switch (statement)
             {
                 case UnresolvedCallStatement unresolvedCall:
-                    var proc = boundProcedures[unresolvedCall.ProcedureName];
-                    return new BoundCallStatement(ResolveProcedure(unresolvedCall.ProcedureName, proc, boundProcedures));
+                    var procName = unresolvedCall.ProcedureName;
+                    var proc = boundProcedures[procName];
+                    var resolvedProc = ResolveProcedure(procName, proc, boundProcedures, resolving);
+                    resolving.Remove(procName);
+                    return new BoundCallStatement(resolvedProc);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(statement));
