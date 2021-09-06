@@ -19,13 +19,13 @@ namespace ForwardRefs.Test.Semantic
         private Dictionary<string, BoundProcedure> CreateProceduresTable(RootSyntax rootSyntax)
         {
             var table = rootSyntax.Procedures
-                .Select(p => new { Procedure = Bind(p), p.Name })
+                .Select(p => new { Procedure = BindProcedure(p), p.Name })
                 .ToDictionary(x => x.Name, x => x.Procedure);
 
             return table;
         }
 
-        private BoundStatement Bind(StatementSyntax statement)
+        private BoundStatement BindStatement(StatementSyntax statement)
         {
             cache.Clear();
 
@@ -38,9 +38,9 @@ namespace ForwardRefs.Test.Semantic
             }
         }
 
-        private BoundProcedure Bind(ProcedureSyntax procedure)
+        private BoundProcedure BindProcedure(ProcedureSyntax procedure)
         {
-            var statements = procedure.Statements.Select(Bind);
+            var statements = procedure.Statements.Select(BindStatement);
             return new BoundProcedure(statements.ToList());
         }
 
